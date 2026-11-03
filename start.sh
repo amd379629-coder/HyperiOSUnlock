@@ -7,23 +7,47 @@ rm -f /root/tunnel.log
 # ২. স্ক্রিন ক্লিয়ার করা
 clear
 
-# ৩. হ্যাকার স্টাইল ব্যানার
-echo -e "\033[1;31m======================================================================"
-echo -e "\033[1;33m                [!] --- [ HACKER GQ ATIKUL ] --- [!]                  "
-echo -e "\033[1;31m======================================================================"
+# ৩. লোডিং অ্যানিমেশন
+echo -e "\033[1;31m"
+echo -n "Initializing Cyber Protocol"
+for i in {1..3}; do
+    echo -n "."
+    sleep 0.3
+done
+echo -e "\033[0m"
+clear
+
+# ৪. ভয়ঙ্কর ডেমন স্কালের ব্যানার প্রিন্ট ফাংশন
+print_banner() {
+    echo -e "\033[1;31m      .---.          .---."
+    echo -e "     /     \\        /     \\"
+    echo -e "    |   ()  |      |  ()   |"
+    echo -e "     \\     / \\    / \\     /"
+    echo -e "      '---'   \\  /   '---'"
+    echo -e "               \\/"
+    echo -e "         .---._____.---."
+    echo -e "        /             \\ "
+    echo -e "       |   \\_______/   |"
+    echo -e "        \\             / "
+    echo -e "         '-----------'"
+    echo -e "\033[1;33m       [!] HACKER GQ ATIKUL [!]"
+    echo -e "\033[1;31m======================================================================\033[0m"
+}
+
+print_banner
 
 echo -e "\n\033[1;32m[x] Initializing Python Server & Secure Tunnel...\033[0m"
 
-# ৪. পাইথন সার্ভার ব্যাকগ্রাউন্ডে চালু করা
+# ৫. পাইথন সার্ভার ব্যাকগ্রাউন্ডে চালু করা
 python3 /sdcard/Download/server.py > /dev/null 2>&1 & 
 sleep 2
 
-# ৫. ক্লাউডফ্লেয়ার টানেল ব্যাকগ্রাউন্ডে চালানো
+# ৬. ক্লাউডফ্লেয়ার টানেল ব্যাকগ্রাউন্ডে চালানো
 /root/cloudflared tunnel --url http://localhost:5000 > /root/tunnel.log 2>&1 &
 
-echo -e "\033[1;33m[x] Waiting for secure tunnel connection...\033[0m"
+echo -e "\033[1;33m[x] Establishing secure connection...\033[0m"
 
-# ৬. সময় বাড়িয়ে ১৫ সেকেন্ডের লুপ চেক (যাতে কোনোভাবেই ফেইল না করে)
+# ৭. ১৫ সেকেন্ডের লুপ চেক
 URL=""
 for i in {1..15}; do
     sleep 1
@@ -33,12 +57,9 @@ for i in {1..15}; do
     fi
 done
 
-# ৭. স্ক্রিন পরিষ্কার করে প্রিমিয়াম লুকে লিংক প্রদর্শন
+# ৮. স্ক্রিন পরিষ্কার করে ভয়ঙ্কর ব্যানারসহ ফাইনাল লিংক প্রদর্শন
 clear
-
-echo -e "\033[1;31m======================================================================"
-echo -e "\033[1;33m                [!] --- [ HACKER GQ ATIKUL ] --- [!]                  "
-echo -e "\033[1;31m======================================================================"
+print_banner
 
 if [ -n "$URL" ]; then
     echo -e "\n\033[1;32m[+] SECURE TUNNEL ESTABLISHED SUCCESSFULLY!\033[0m"
@@ -49,5 +70,5 @@ else
     echo -e "\n\033[1;31m[-] ERROR: Tunnel connection failed. Check your internet connection.\033[0m\n"
 fi
 
-# ৮. সেশন ধরে রাখা
+# ৯. সেশন ধরে রাখা
 wait
