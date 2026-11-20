@@ -1,53 +1,39 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# ১. পুরনো সার্ভিস ও ব্যাকগ্রাউন্ড লগ পরিষ্কার করা
+# ১. পুরনো প্রসেস ও লগ পরিষ্কার করা (পোর্ট এবং পাইথন সার্ভার কিল করা)
 fuser -k 5000/tcp 2>/dev/null
+pkill -f "server.py" 2>/dev/null
+pkill -f "cloudflared tunnel" 2>/dev/null
 rm -f /root/tunnel.log
 
-# ২. স্ক্রিন ক্লিয়ার করা
-clear
+# ২. ছবি সেভ করার ফোল্ডার নিশ্চিত করা (উবুন্টু এবং মূল ডাউনলোড ফোল্ডার লিংক করা)
+mkdir -p /root/captured_images
+mkdir -p /sdcard/Download/captured_images
 
-# ৩. লোডিং অ্যানিমেশন
-echo -e "\033[1;31m"
-echo -n "Initializing Cyber Protocol"
-for i in {1..3}; do
-    echo -n "."
-    sleep 0.3
-done
-echo -e "\033[0m"
-clear
-
-# ৪. ভয়ঙ্কর ডেমন স্কালের ব্যানার প্রিন্ট ফাংশন
-print_banner() {
-    echo -e "\033[1;31m      .---.          .---."
-    echo -e "     /     \\        /     \\"
-    echo -e "    |   ()  |      |  ()   |"
-    echo -e "     \\     / \\    / \\     /"
-    echo -e "      '---'   \\  /   '---'"
-    echo -e "               \\/"
-    echo -e "         .---._____.---."
-    echo -e "        /             \\ "
-    echo -e "       |   \\_______/   |"
-    echo -e "        \\             / "
-    echo -e "         '-----------'"
-    echo -e "\033[1;33m       [!] HACKER GQ ATIKUL [!]"
-    echo -e "\033[1;31m======================================================================\033[0m"
+# কার্সার লুকানো এবং Ctrl+C চাপলে সব ব্যাকগ্রাউন্ড প্রসেস ও কার্সার স্বাভাবিক করার ব্যবস্থা
+printf '\033[?25l'
+cleanup() {
+    printf "\033[?25h\033[0m\n"
+    kill "$SERVER_PID" "$TUNNEL_PID" 2>/dev/null
+    fuser -k 5000/tcp 2>/dev/null
+    pkill -f "server.py" 2>/dev/null
+    echo -e "\033[1;31m[!] Server & Tunnel Stopped.\033[0m"
+    exit 0
 }
+trap cleanup INT TERM
 
-print_banner
+clear 2>/dev/null || printf '\033[H\033[2J\033[3J'
 
-echo -e "\n\033[1;32m[x] Initializing Python Server & Secure Tunnel...\033[0m"
+# ৩. ব্যাকগ্রাউন্ডে পাইথন সার্ভার (port 5000) ও ক্লাউডফ্লেয়ার টানেল চালু করা
+python3 /sdcard/Download/server.py &
+SERVER_PID=$!
+sleep 3
 
-# ৫. পাইথন সার্ভার ব্যাকগ্রাউন্ডে চালু করা
-python3 /sdcard/Download/server.py > /dev/null 2>&1 & 
-sleep 2
+/root/cloudflared tunnel --url http://127.0.0.1:5000 > /root/tunnel.log 2>&1 &
+TUNNEL_PID=$!
 
-# ৬. ক্লাউডফ্লেয়ার টানেল ব্যাকগ্রাউন্ডে চালানো
-/root/cloudflared tunnel --url http://localhost:5000 > /root/tunnel.log 2>&1 &
-
-echo -e "\033[1;33m[x] Establishing secure connection...\033[0m"
-
-# ৭. ১৫ সেকেন্ডের লুপ চেক
+# ৪. পাবলিক লিংক তৈরি হওয়ার জন্য অপেক্ষা করা (সর্বোচ্চ ১৫ সেকেন্ড)
+echo -e "\033[1;33m[x] Initializing Server & Establishing Cloudflare Tunnel...\033[0m"
 URL=""
 for i in {1..15}; do
     sleep 1
@@ -57,18 +43,127 @@ for i in {1..15}; do
     fi
 done
 
-# ৮. স্ক্রিন পরিষ্কার করে ভয়ঙ্কর ব্যানারসহ ফাইনাল লিংক প্রদর্শন
-clear
-print_banner
+clear 2>/dev/null || printf '\033[H\033[2J\033[3J'
 
+# ৫. তোমার দেওয়া হুবহু ভূতের পরিবার আর্ট
+lines=()
+while IFS= read -r line; do
+    lines+=("$line")
+done <<'ART'
+         ,/\_/\_/\_/\
+       ,/\/         \
+     ,/\/     .--.    \
+    /\/      /    \    |
+   /\/      | M  N |    |
+  /\/        \ __ /     |
+  |            ----      |
+  |           /    \     |
+ /_\         /      \    |
+(   \_______/        \___|
+ \                        \
+  \      /\        /\     |
+   \    /  \      /  \    |
+    \  /    \    /    \   |
+     \/      \  /      \  |
+     ||\\\\    \/       \ |
+     || |||             \\|
+    /  \|||
+   /         |      |
+  |          |      |
+  |          |      |
+   \         |      |
+    \        |      |
+     \       |      |
+      \,     |      |
+        \    /\     /\
+        /\  /  \   /  \
+       /  \/    \ /    \
+      /||||      |      |
+     / |||||    /|      |\
+                MAA KALI
+     .-""-.                              .-""-.
+    ( Y  Z )                            ( V  W )
+     \ ~~ /                              \ ~~ /
+      '--'                                '--'
+     /|  |\                              /|  |\
+    / |  | \                            / |  | \
+        ||                                  ||
+       /  \                                /  \
+      (    )                              (    )
+       '--'                                '--'
+ART
+
+# ভূতের ডান পাশে বসানোর জন্য বড় ব্লক-ফন্ট টেক্সট (৫ লাইন)
+banner=(
+" ##  #      #  ### ### #  # # # #"
+"#   # #    # #  #   #  # #  # # #"
+"# # # #    ###  #   #  ##   # # #"
+"# #  #     # #  #   #  # #  # # #"
+" ##   #    # #  #  ### #  #  #  ###"
+)
+banner_start_row=4
+pad_width=48
+
+# ---------- প্রথমে পুরো স্থির ছবিটা একবার প্রিন্ট করা (চোখ ছাড়া) ----------
+printf '\033[1;37m'
+
+eye_rows=()
+eye_cols=()
+
+row=0
+for line in "${lines[@]}"; do
+    plain="$line"
+    for marker in M N Y Z V W; do
+        case "$plain" in
+            *"$marker"*)
+                case "$plain" in
+                    *MAA*) continue ;;
+                esac
+                prefix="${plain%%$marker*}"
+                col=${#prefix}
+                eye_rows+=("$row")
+                eye_cols+=("$col")
+                plain="${plain/$marker/ }"
+                ;;
+        esac
+    done
+
+    banner_idx=$((row - banner_start_row))
+    if [ "$banner_idx" -ge 0 ] && [ "$banner_idx" -lt "${#banner[@]}" ]; then
+        printf '%-*s' "$pad_width" "$plain"
+        printf '\033[1;31m%s\033[1;37m\n' "${banner[$banner_idx]}"
+    else
+        printf '%s\n' "$plain"
+    fi
+    row=$((row+1))
+done
+
+printf '\033[0m'
+printf '\033[1;31m    MAA DAKINI                              MAA YOGINI\033[0m\n'
+printf '\033[1;37m===========================================================\033[0m\n'
+
+# ৬. নিচে লাইভ পাবলিক লিংক প্রদর্শন
 if [ -n "$URL" ]; then
-    echo -e "\n\033[1;32m[+] SECURE TUNNEL ESTABLISHED SUCCESSFULLY!\033[0m"
-    echo -e "\033[1;37m----------------------------------------------------------------------\033[0m"
-    echo -e "\033[1;36m  TARGET URL : \033[1;33m$URL\033[0m"
-    echo -e "\033[1;37m----------------------------------------------------------------------\033[0m\n"
+    printf '\033[1;32m [+] LIVE PUBLIC URL : \033[1;33m%s\033[0m\n' "$URL"
 else
-    echo -e "\n\033[1;31m[-] ERROR: Tunnel connection failed. Check your internet connection.\033[0m\n"
+    printf '\033[1;31m [-] ERROR: Tunnel connection failed! Check internet.\033[0m\n'
 fi
+printf '\033[1;37m===========================================================\033[0m\n'
+printf '\033[1;30m   (বন্ধ করতে Ctrl+C চাপুন)\033[0m\n'
 
-# ৯. সেশন ধরে রাখা
-wait
+# ---------- এখন শুধু চোখ লাল <-> অন্ধকার, অসীম লুপে ----------
+on=1
+while true; do
+    for i in "${!eye_rows[@]}"; do
+        r="${eye_rows[$i]}"
+        c="${eye_cols[$i]}"
+        printf '\033[%d;%dH' "$((r+1))" "$((c+1))"
+        if [ "$on" -eq 1 ]; then
+            printf '\033[1;31mo\033[0m'
+        else
+            printf ' '
+        fi
+    done
+    if [ "$on" -eq 1 ]; then on=0; else on=1; fi
+    sleep 0.6
+done
